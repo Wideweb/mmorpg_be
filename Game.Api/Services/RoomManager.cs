@@ -3,13 +3,14 @@ using Game.Api.Models.Game;
 using Game.Api.Services.Utils;
 using System;
 using System.Collections.Concurrent;
+using System.Reactive.Linq;
 using System.Threading;
 
 namespace Game.Api.Services
 {
     public class RoomManager
     {
-        private readonly TimeSpan _updateRoomDelay = TimeSpan.FromSeconds(1);
+        private readonly TimeSpan _updateRoomDelay = TimeSpan.FromSeconds(5);
 
         private readonly DungeonRepository _dungeonRepository;
 
@@ -34,7 +35,9 @@ namespace Game.Api.Services
 
             _rooms.TryAdd(name, room);
 
-            BackgroundJobService.RepeatActionEvery(() => UpdateRoom(name, cancelSource), _updateRoomDelay, cancelSource.Token);
+            Observable
+                .Interval(_updateRoomDelay)
+                .Subscribe(x => UpdateRoom(name, cancelSource), cancelSource.Token);
         }
 
         public void RemoveRoom(string name)
