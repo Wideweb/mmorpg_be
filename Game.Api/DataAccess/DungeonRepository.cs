@@ -58,7 +58,9 @@ namespace Game.Api.DataAccess
                 Name = "Test",
                 MaxPlayersNumber = 2,
                 Map = dungeonMap,
-                Units = dungeonUnits
+                Units = dungeonUnits,
+                Height = map.Length,
+                Width = map[0].Length
             };
 
             dungeons.Add(dungeon);

@@ -13,7 +13,8 @@ namespace Game.Api.WebSocketManager
             { WebSocketEvent.UnitState, typeof(UnitStateMessageArgs) },
             { WebSocketEvent.UserConnected, typeof(UserConnectedMessageArgs) },
             { WebSocketEvent.UserData, typeof(UserDataMessageArgs) },
-            { WebSocketEvent.UserDisconnected, typeof(UserDisconnectedMessageArgs) }
+            { WebSocketEvent.UserDisconnected, typeof(UserDisconnectedMessageArgs) },
+            { WebSocketEvent.JoinRoom, typeof(JoinRoomMessageArgs) }
         };
 
         public static WebSocketMessageArgs GetWebSocketArgs(string eventName, string args)

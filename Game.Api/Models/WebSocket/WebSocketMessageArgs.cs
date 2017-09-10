@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Game.Api.Models.WebSocket
+﻿namespace Game.Api.Models.WebSocket
 {
     public class WebSocketMessageArgs
     {

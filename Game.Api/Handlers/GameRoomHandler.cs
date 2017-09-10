@@ -1,6 +1,8 @@
 ﻿using Game.Api.Constants;
 using Game.Api.Models.WebSocket;
+using Game.Api.Services;
 using Game.Api.WebSocketManager;
+using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
@@ -9,48 +11,53 @@ namespace Game.Api.Handlers
 {
     public class GameRoomHandler : WebSocketHandler
     {
-        public GameRoomHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager)
+        private readonly RoomManager _roomManager;
+
+        public GameRoomHandler(WebSocketConnectionManager webSocketConnectionManager, 
+            WebSocketMessageService webSocketMessageService, 
+            RoomManager roomManager) : base(webSocketConnectionManager, webSocketMessageService)
         {
+            _roomManager = roomManager;
         }
 
-        public override async Task OnConnected(WebSocket socket)
+        public override async Task OnConnected(WebSocket socket, string group, string sid)
         {
-            await base.OnConnected(socket);
+            await base.OnConnected(socket, group, sid);
 
-            var socketId = WebSocketConnectionManager.GetId(socket);
-            var otherSocketIds = WebSocketConnectionManager
-                .GetAll()
-                .Where(it => it.Key != socketId)
-                .Select(it => it.Key);
+            var players = _roomManager.GetPlayers(group);
+            var player = players.SingleOrDefault(it => it.Sid == sid);
+            var units = _roomManager.GetUnits(group);
 
             var userDataMessageArgs = new UserDataMessageArgs
             {
-                Id = socketId,
-                X = 1,
-                Y = 1,
-                Enemies = otherSocketIds,
-                EnemiesX = otherSocketIds.Select(it => 1),
-                EnemiesY = otherSocketIds.Select(it => 1)
+                Id = sid,
+                X = player.X,
+                Y = player.Y,
+                Enemies = units.Select(it => it.Sid.ToString()),
+                EnemiesX = units.Select(it => it.Position.X),
+                EnemiesY = units.Select(it => it.Position.Y)
             };
-            await SendMessageAsync(socketId, WebSocketEvent.UserData, userDataMessageArgs);
+            await WebSocketMessageService.SendMessageAsync(sid, WebSocketEvent.UserData, userDataMessageArgs);
 
             var userConnectedMessageArgs = new UserConnectedMessageArgs
             {
-                Id = socketId,
-                X = 1,
-                Y = 1
+                Id = sid,
+                X = player.X,
+                Y = player.Y
             };
-            await SendMessageToAsync(WebSocketEvent.UserConnected, userConnectedMessageArgs, it => it != socketId);
+            await WebSocketMessageService.SendMessageToGroupAsync(group, WebSocketEvent.UserConnected, userConnectedMessageArgs);
         }
 
-        public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string eventName, WebSocketMessageArgs eventArgs)
+        public override async Task ReceiveAsync(WebSocket socket, string group, string sid, WebSocketReceiveResult result, string eventName, WebSocketMessageArgs eventArgs)
         {
-            var socketId = WebSocketConnectionManager.GetId(socket);
+            var socketId = WebSocketConnectionManager.GetId(socket, group);
 
             switch (eventName)
             {
                 case WebSocketEvent.UnitState:
-                    await SendMessageToAllAsync(eventName, eventArgs);
+                    var args = (UnitStateMessageArgs)eventArgs;
+                    _roomManager.UpdatePlayer(group, sid, args.X, args.Y);
+                    await WebSocketMessageService.SendMessageToGroupAsync(group, eventName, eventArgs);
                     break;
                 default:
                     break;
@@ -59,15 +66,16 @@ namespace Game.Api.Handlers
 
         public override async Task OnDisconnected(WebSocket socket)
         {
-            var socketId = WebSocketConnectionManager.GetId(socket);
+            var group = WebSocketConnectionManager.GetGroup(socket);
+            var sid = WebSocketConnectionManager.GetId(socket, group);
+
             await base.OnDisconnected(socket);
 
             var messageArgs = new UserDisconnectedMessageArgs
             {
-                Id = socketId
+                Id = sid
             };
-            await SendMessageToAllAsync(WebSocketEvent.UserDisconnected, messageArgs);
+            await WebSocketMessageService.SendMessageToGroupAsync(group, WebSocketEvent.UserDisconnected, messageArgs);
         }
-
     }
 }

@@ -78,6 +78,7 @@ namespace Game.Api.Auth
             // You can add other claims here, if you want:
             var claims = new Claim[]
             {
+                new Claim(ClaimTypes.Sid, identity.Id.ToString()),
                 new Claim(ClaimTypes.Name, identity.UserName),
                 new Claim(ClaimTypes.Role, identity.Role.Name),
                 new Claim(JwtRegisteredClaimNames.Sub, username),

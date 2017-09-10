@@ -1,4 +1,6 @@
-﻿namespace Game.Api.Models.Game
+﻿using System;
+
+namespace Game.Api.Models.Game
 {
     public class Unit
     {

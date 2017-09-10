@@ -1,8 +1,15 @@
-﻿using Game.Api.Models.WebSocket;
+﻿using Game.Api.Auth;
+using Game.Api.Constants;
+using Game.Api.Models.WebSocket;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +20,15 @@ namespace Game.Api.WebSocketManager
     {
         private readonly RequestDelegate _next;
         private WebSocketHandler _webSocketHandler { get; set; }
+        private CustomJwtDataFormat _customJwtDataFormat { get; set; }
 
         public WebSocketManagerMiddleware(RequestDelegate next,
-                                          WebSocketHandler webSocketHandler)
+                                          WebSocketHandler webSocketHandler,
+                                          CustomJwtDataFormat customJwtDataFormat)
         {
             _next = next;
             _webSocketHandler = webSocketHandler;
+            _customJwtDataFormat = customJwtDataFormat;
         }
 
         public async Task Invoke(HttpContext context)
@@ -26,8 +36,9 @@ namespace Game.Api.WebSocketManager
             if (!context.WebSockets.IsWebSocketRequest)
                 return;
 
+            var group = "";
+
             var socket = await context.WebSockets.AcceptWebSocketAsync();
-            await _webSocketHandler.OnConnected(socket);
 
             await Receive(socket, async (result, buffer) =>
             {
@@ -36,9 +47,26 @@ namespace Game.Api.WebSocketManager
                     var eventString = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     var eventMessage = JsonConvert.DeserializeObject<WebSocketMessage>(eventString);
 
+                    var tiket = _customJwtDataFormat.Unprotect(eventMessage.Token);
+                    if(tiket == null)
+                    {
+                        return;
+                    }
+
+                    context.User = tiket.Principal;
+                    var userId = context.User.Claims.SingleOrDefault(it => it.Type == ClaimTypes.Sid).Value;
+
+
                     var args = WebSocketMessageArgsHandler.GetWebSocketArgs(eventMessage.Event, eventMessage.Data);
 
-                    await _webSocketHandler.ReceiveAsync(socket, result, eventMessage.Event, args);
+                    if (eventMessage.Event == WebSocketEvent.JoinRoom)
+                    {
+                        await _webSocketHandler.OnConnected(socket, ((JoinRoomMessageArgs)args).Room, userId);
+                    }
+                    else
+                    {
+                        await _webSocketHandler.ReceiveAsync(socket, group, userId, result, eventMessage.Event, args);
+                    }
                     return;
                 }
 

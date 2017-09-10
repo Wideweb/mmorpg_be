@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Game.Api.Models.Game
+namespace Game.Api.Game
 {
     public class Dungeon
     {
@@ -10,12 +10,17 @@ namespace Game.Api.Models.Game
 
         public int MaxPlayersNumber { get; set; }
 
-        public List<MapCell> Map { get; set; }
+        public MapCell[][] Map { get; set; }
 
-        public int Height { get; set; }
+        public int Height => Map.Length;
 
-        public int Width { get; set; }
+        public int Width => Map[0].Length;
 
         public List<Unit> Units { get; set; }
+
+        public MapCell GetCell(int x, int y)
+        {
+            return Map[y][x];
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace Game.Api.Auth
         public AuthenticationTicket Unprotect(string protectedText)
             => Unprotect(protectedText, null);
 
-        public AuthenticationTicket Unprotect(string protectedText, string purpose)
+        public AuthenticationTicket Unprotect(string protectedText, string purpose = null)
         {
             var handler = new JwtSecurityTokenHandler();
             ClaimsPrincipal principal = null;
@@ -53,7 +53,7 @@ namespace Game.Api.Auth
             }
 
             // Token validation passed
-            return new AuthenticationTicket(principal, new AuthenticationProperties(), "Cookie");
+            return new AuthenticationTicket(principal, new AuthenticationProperties(), "");
         }
 
         public string Protect(AuthenticationTicket data)

@@ -2,10 +2,10 @@
 {
     public class MapCell
     {
-        public long X { get; set; }
+        public int X { get; set; }
 
-        public long Y { get; set; }
+        public int Y { get; set; }
 
-        public long Type { get; set; }
+        public int Type { get; set; }
     }
 }

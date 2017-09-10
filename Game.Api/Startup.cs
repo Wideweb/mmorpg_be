@@ -52,6 +52,7 @@ namespace Game.Api
             services.AddSingleton(typeof(RoomManager));
             services.AddTransient<IEncryptionService, EncryptionService>();
             services.AddTransient<IMembershipService, MembershipService>();
+            services.AddTransient<IDungeonService, DungeonService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,7 +69,7 @@ namespace Game.Api
             app.UseMvc();
 
             app.UseWebSockets();
-            
+
             app.MapWebSocketManager("/gr", serviceProvider.GetService<GameRoomHandler>());
         }
     }

@@ -6,10 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Security.Claims;
-using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Api
 {
@@ -41,7 +38,8 @@ namespace Game.Api
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = tokenValidationParameters;
                 options.Events = new JwtBearerEvents()
@@ -56,6 +54,8 @@ namespace Game.Api
                     }
                 };
             });
+
+            services.AddSingleton(new CustomJwtDataFormat(SecurityAlgorithms.HmacSha256, tokenValidationParameters));
         }
 
         private void UseAuth(IApplicationBuilder app)
