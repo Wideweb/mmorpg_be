@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Api.WebSocketManager
 {
-    public class WebSocketConnectionManager
+    public abstract class WebSocketConnectionManager
     {
         private ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> _sockets;
 

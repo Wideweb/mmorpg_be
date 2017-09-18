@@ -1,5 +1,4 @@
-﻿using Game.Api.DataAccess;
-using Game.Api.Models.Identity;
+﻿using Game.Api.DataAccess.Models.Identity;
 using Game.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;

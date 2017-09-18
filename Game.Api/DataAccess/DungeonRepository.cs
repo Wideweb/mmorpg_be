@@ -1,4 +1,4 @@
-﻿using Game.Api.Models.Game;
+﻿using Game.Api.DataAccess.Models.Game;
 using Game.Api.Services.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +12,11 @@ namespace Game.Api.DataAccess
             new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
             new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
             new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-            new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-            new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-            new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-            new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-            new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+            new int[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+            new int[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+            new int[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+            new int[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+            new int[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
             new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
             new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
         };
@@ -45,11 +45,11 @@ namespace Game.Api.DataAccess
             var dungeonUnits = new List<Unit>();
             dungeonUnits.Add(new Unit
             {
-                Id = 1,
+                Id = 95,
                 Health = 100,
                 UnitType = 1,
-                X = 5,
-                Y = 5
+                X = 6,
+                Y = 6
             });
 
             var dungeon = new Dungeon
@@ -60,7 +60,9 @@ namespace Game.Api.DataAccess
                 Map = dungeonMap,
                 Units = dungeonUnits,
                 Height = map.Length,
-                Width = map[0].Length
+                Width = map[0].Length,
+                OriginPositionX = 1,
+                OriginPositionY = 1
             };
 
             dungeons.Add(dungeon);

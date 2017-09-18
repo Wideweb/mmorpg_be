@@ -1,4 +1,6 @@
-﻿namespace Game.Api.Game.PathfindingAlgorithm
+﻿using Game.Api.Game.Models;
+
+namespace Game.Api.Game.PathfindingAlgorithm
 {
     public class AStartCell
     {

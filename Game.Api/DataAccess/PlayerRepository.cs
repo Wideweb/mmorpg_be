@@ -1,6 +1,4 @@
-﻿using Game.Api.Models;
-using Game.Api.Models.Game;
-using Game.Api.Models.Identity;
+﻿using Game.Api.DataAccess.Models.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿using Game.Api.Models.WebSocket;
+﻿using Game.Api.WebSocketManager.Messages;
 using Newtonsoft.Json;
 using System;
 using System.Linq;

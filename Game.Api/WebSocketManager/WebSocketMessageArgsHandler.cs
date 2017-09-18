@@ -1,5 +1,5 @@
 ﻿using Game.Api.Constants;
-using Game.Api.Models.WebSocket;
+using Game.Api.WebSocketManager.Messages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,8 @@ namespace Game.Api.WebSocketManager
             { WebSocketEvent.UserConnected, typeof(UserConnectedMessageArgs) },
             { WebSocketEvent.UserData, typeof(UserDataMessageArgs) },
             { WebSocketEvent.UserDisconnected, typeof(UserDisconnectedMessageArgs) },
-            { WebSocketEvent.JoinRoom, typeof(JoinRoomMessageArgs) }
+            { WebSocketEvent.JoinRoom, typeof(JoinRoomMessageArgs) },
+            { WebSocketEvent.SetTarget, typeof(SetTargetMessageArgs) }
         };
 
         public static WebSocketMessageArgs GetWebSocketArgs(string eventName, string args)

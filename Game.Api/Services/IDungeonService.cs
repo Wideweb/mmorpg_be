@@ -1,4 +1,4 @@
-﻿using Game.Api.Game;
+﻿using Game.Api.Game.Models;
 
 namespace Game.Api.Services
 {

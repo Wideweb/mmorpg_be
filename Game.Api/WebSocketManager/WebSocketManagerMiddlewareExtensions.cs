@@ -16,10 +16,18 @@ namespace Game.Api.WebSocketManager
 
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
         {
-            services.AddTransient<WebSocketConnectionManager>();
-
             foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
             {
+                if (type.GetTypeInfo().BaseType == typeof(WebSocketConnectionManager))
+                {
+                    services.AddSingleton(type);
+                }
+
+                if (type.GetTypeInfo().BaseType == typeof(WebSocketMessageService))
+                {
+                    services.AddSingleton(type);
+                }
+
                 if (type.GetTypeInfo().BaseType == typeof(WebSocketHandler))
                 {
                     services.AddSingleton(type);

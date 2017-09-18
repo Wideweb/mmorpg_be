@@ -2,6 +2,6 @@
 {
     public static class GameConstants
     {
-        public static int MapCellWidth = 50;
+        public static int MapCellWidth = 20;
     }
 }

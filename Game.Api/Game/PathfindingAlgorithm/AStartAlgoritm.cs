@@ -1,4 +1,4 @@
-﻿using Game.Api.Models.Game;
+﻿using Game.Api.Game.Models;
 using System;
 using System.Collections.Generic;
 

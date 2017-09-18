@@ -1,10 +1,5 @@
-﻿using Game.Api.Models.WebSocket;
-using Newtonsoft.Json;
-using System;
-using System.Linq;
+﻿using Game.Api.WebSocketManager.Messages;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game.Api.WebSocketManager
@@ -30,6 +25,6 @@ namespace Game.Api.WebSocketManager
             await WebSocketConnectionManager.RemoveSocket(socket);
         }
 
-        public abstract Task ReceiveAsync(WebSocket socket, string group, string userId, WebSocketReceiveResult result, string eventName, WebSocketMessageArgs eventArgs);
+        public abstract Task ReceiveAsync(WebSocket socket, string userId, WebSocketReceiveResult result, string eventName, WebSocketMessageArgs eventArgs);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Game.Api.Models.Identity;
+﻿using Game.Api.DataAccess.Models.Identity;
 using System.Collections.Generic;
 using System.Linq;
 

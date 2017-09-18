@@ -1,6 +1,8 @@
 ﻿using Game.Api.DataAccess;
 using Game.Api.Game;
+using Game.Api.Game.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Api.Services
 {
@@ -25,12 +27,7 @@ namespace Game.Api.Services
                 for (var x = 0; x < dbDungeon.Width; x++)
                 {
                     var dbCell = dbDungeon.Map[y * dbDungeon.Width + x];
-                    map[y][x] = new MapCell
-                    {
-                        X = x,
-                        Y = y,
-                        Type = dbCell.Type
-                    };
+                    map[y][x] = new MapCell(x, y, dbCell.Type);
                 }
             }
 
@@ -39,14 +36,15 @@ namespace Game.Api.Services
                 Id = dbDungeon.Id,
                 Name = dbDungeon.Name,
                 MaxPlayersNumber = dbDungeon.MaxPlayersNumber,
-                Map = map
+                Map = map,
+                OriginPosition = new Point { X = dbDungeon.OriginPositionX, Y = dbDungeon.OriginPositionY }
             };
-
+            
             var units = new List<Unit>();
 
             foreach(var dbUnit in dbDungeon.Units)
             {
-                var unit = new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon);
+                units.Add(new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon, dbUnit.Id.ToString(), true));
             }
 
             dungeon.Units = units;

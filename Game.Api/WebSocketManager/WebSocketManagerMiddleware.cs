@@ -1,15 +1,12 @@
 ﻿using Game.Api.Auth;
 using Game.Api.Constants;
-using Game.Api.Models.WebSocket;
-using Microsoft.AspNetCore.Authentication;
+using Game.Api.WebSocketManager.Messages;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,8 +33,6 @@ namespace Game.Api.WebSocketManager
             if (!context.WebSockets.IsWebSocketRequest)
                 return;
 
-            var group = "";
-
             var socket = await context.WebSockets.AcceptWebSocketAsync();
 
             await Receive(socket, async (result, buffer) =>
@@ -54,18 +49,17 @@ namespace Game.Api.WebSocketManager
                     }
 
                     context.User = tiket.Principal;
-                    var userId = context.User.Claims.SingleOrDefault(it => it.Type == ClaimTypes.Sid).Value;
-
+                    var sid = context.UserSid();
 
                     var args = WebSocketMessageArgsHandler.GetWebSocketArgs(eventMessage.Event, eventMessage.Data);
 
                     if (eventMessage.Event == WebSocketEvent.JoinRoom)
                     {
-                        await _webSocketHandler.OnConnected(socket, ((JoinRoomMessageArgs)args).Room, userId);
+                        await _webSocketHandler.OnConnected(socket, ((JoinRoomMessageArgs)args).Room, sid);
                     }
                     else
                     {
-                        await _webSocketHandler.ReceiveAsync(socket, group, userId, result, eventMessage.Event, args);
+                        await _webSocketHandler.ReceiveAsync(socket, sid, result, eventMessage.Event, args);
                     }
                     return;
                 }

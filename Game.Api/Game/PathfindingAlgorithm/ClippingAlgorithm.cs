@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game.Api.Game.Models;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Api.Game.PathfindingAlgorithm
@@ -15,9 +16,9 @@ namespace Game.Api.Game.PathfindingAlgorithm
                 Y = p2.Y - p1.Y
             };
 
-            var tLower = 0;
-            var tUpper = 1;
-            var t = 0;
+            float tLower = 0.0f;
+            float tUpper = 1.0f;
+            float t = 0.0f;
 
             for (var i = 0; i < polygon.Count; i++)
             {
@@ -32,8 +33,8 @@ namespace Game.Api.Game.PathfindingAlgorithm
                     Y = p1.Y - polygon[i].Y
                 };
 
-                var dScalar = d.X * n.X + d.Y * n.Y;
-                var wScalar = w.X * n.X + w.Y * n.Y;
+                float dScalar = d.X * n.X + d.Y * n.Y;
+                float wScalar = w.X * n.X + w.Y * n.Y;
 
                 if (Math.Abs(dScalar) < EPSILON)
                 {
@@ -68,14 +69,14 @@ namespace Game.Api.Game.PathfindingAlgorithm
             {
                 var lowerPoint = new Point
                 {
-                    X = p1.X + (p2.X - p1.X) * tLower,
-                    Y = p1.Y + (p2.Y - p1.Y) * tLower
+                    X = (int)(p1.X + (p2.X - p1.X) * tLower),
+                    Y = (int)(p1.Y + (p2.Y - p1.Y) * tLower)
                 };
 
                 var upperPoint = new Point
                 {
-                    X = p1.X + (p2.X - p1.X) * tUpper,
-                    Y = p1.Y + (p2.Y - p1.Y) * tUpper
+                    X = (int)(p1.X + (p2.X - p1.X) * tUpper),
+                    Y = (int)(p1.Y + (p2.Y - p1.Y) * tUpper)
                 };
 
                 return new List<Point> { lowerPoint, upperPoint };
