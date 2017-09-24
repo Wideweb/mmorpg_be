@@ -8,6 +8,6 @@ namespace Game.Api.Game.Dto
 
         public DateTime JoinedAt { get; set; }
 
-        public UnitDto Unit { get; set; }
+        public GameObjectDto Unit { get; set; }
     }
 }

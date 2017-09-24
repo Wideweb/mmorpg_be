@@ -1,5 +1,7 @@
 ﻿using Game.Api.Constants;
 using Game.Api.Game.Models;
+using Game.Api.Game.Models.Abilities;
+using Game.Api.Game.Profiles;
 using Game.Api.Services;
 using Game.Api.Services.Utils;
 using Game.Api.WebSocketManager;
@@ -37,10 +39,11 @@ namespace Game.Api.Game.Services
 
             var dungeon = _dungeonService.GetById(dungeonType);
 
-            foreach(var unit in dungeon.Units)
+            foreach(var gameObject in dungeon.GameObjects.Where(it => it.Value.Type == GameObjectType.Unit))
             {
+                var unit = (gameObject.Value as Unit);
                 unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, name);
-                unit.OnFired += (s, args) => OnUnitFired(s, args, name);
+                unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, name);
             }
 
             var room = new Room
@@ -64,20 +67,43 @@ namespace Game.Api.Game.Services
         private async void OnUnitCellChanged(object s, EventArgs args, string room)
         {
             var unit = s as Unit;
-            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.UnitState, new UnitStateMessageArgs
+            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
             {
-                Sid = unit.Sid,
-                Position = unit.Position
+                GameObject = GameProfiles.Map(unit)
             });
         }
 
-        private async void OnUnitFired(object s, EventArgs args, string room)
+        private async void OnUnitAbilityUsed(object s, AbilityUsedEventArgs args, string roomName)
         {
             var unit = s as Unit;
-            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.UnitFired, new UnitFiredMessageArgs
+            var bulletSid = Guid.NewGuid().ToString();
+
+            if (args.IsRanged)
+            {
+                var room = GetRoom(roomName);
+                var bullet = new Bullet(bulletSid, unit.ScreenPositionCenter, unit.Target as Unit, 5);
+                bullet.OnDamageDealt += (sBullet, e) => OnDamageDealt(sBullet, e, room);
+                room.Dungeon.GameObjects.TryAdd(bulletSid, bullet);
+            }
+
+            await _webSocketMessageService.SendMessageToGroupAsync(roomName, WebSocketEvent.UseAbility, new UseAbilityMessageArgs
             {
                 Sid = unit.Sid,
-                TargetSid = (unit.Target as Unit).Sid
+                TargetSid = (unit.Target as Unit).Sid,
+                BulletSid = bulletSid,
+                AbilityType = args.AbilityType
+            });
+        }
+
+        private async void OnDamageDealt(object s, DamageDealtEventArgs args, Room room)
+        {
+            var gameObject = s as GameObject;
+            room.Dungeon.GameObjects.TryRemove(gameObject.Sid, out gameObject);
+
+            await _webSocketMessageService.SendMessageToGroupAsync(room.Name, WebSocketEvent.DealDamage, new DealDamageMessageArgs
+            {
+                TargetSid = args.Target.Sid,
+                Damage = args.Damage
             });
         }
 
@@ -106,8 +132,8 @@ namespace Game.Api.Game.Services
 
             var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false);
             unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, roomName);
-            unit.OnFired += (s, args) => OnUnitFired(s, args, roomName);
-            room.Dungeon.Units.Add(unit);
+            unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, roomName);
+            room.Dungeon.GameObjects.TryAdd(sid, unit);
 
             room.Players.Add(new Player
             {
@@ -139,15 +165,9 @@ namespace Game.Api.Game.Services
                 return;
             }
 
-            /*
-            room.Clock.Stop();
-            var elapsed = room.Clock.Elapsed;
-            room.Clock.Start();
-            */
-
-            foreach (var unit in room.Dungeon.Units)
+            foreach (var gameObject in room.Dungeon.GameObjects)
             {
-                unit.Update(_updateRoomDelay.Milliseconds);
+                gameObject.Value.Update(_updateRoomDelay.Milliseconds);
             }
         }
     }

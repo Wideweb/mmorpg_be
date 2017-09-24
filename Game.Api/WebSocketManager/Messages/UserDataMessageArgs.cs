@@ -7,6 +7,6 @@ namespace Game.Api.WebSocketManager.Messages
     {
         public PlayerDto Player { get; set; }
 
-        public IEnumerable<UnitDto> Units { get; set; }
+        public IEnumerable<GameObjectDto> GameObjects { get; set; }
     }
 }

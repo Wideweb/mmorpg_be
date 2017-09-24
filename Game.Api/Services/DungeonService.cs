@@ -40,14 +40,11 @@ namespace Game.Api.Services
                 OriginPosition = new Point { X = dbDungeon.OriginPositionX, Y = dbDungeon.OriginPositionY }
             };
             
-            var units = new List<Unit>();
-
             foreach(var dbUnit in dbDungeon.Units)
             {
-                units.Add(new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon, dbUnit.Id.ToString(), true));
+                var sid = dbUnit.Id.ToString();
+                dungeon.GameObjects.TryAdd(sid, new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon, sid, true));
             }
-
-            dungeon.Units = units;
 
             return dungeon;
         }

@@ -15,7 +15,7 @@ namespace Game.Api.Game.Models
         public Dungeon Dungeon { get; set; }
 
         public Stopwatch Clock { get; set; }
-
+        
         public Room()
         {
             Players = new List<Player>();

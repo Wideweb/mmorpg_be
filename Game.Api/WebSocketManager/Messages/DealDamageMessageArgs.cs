@@ -1,9 +1,9 @@
 ﻿namespace Game.Api.WebSocketManager.Messages
 {
-    public class UnitFiredMessageArgs : WebSocketMessageArgs
+    public class DealDamageMessageArgs : WebSocketMessageArgs
     {
-        public string Sid { get; set; }
-
         public string TargetSid { get; set; }
+
+        public int Damage { get; set; }
     }
 }

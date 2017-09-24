@@ -33,12 +33,17 @@ namespace Game.Api.Game.Profiles
             };
         }
 
-        public static UnitDto Map(Unit unit)
+        public static GameObjectDto Map(GameObject gameObject)
         {
-            return new UnitDto
+            return new GameObjectDto
             {
-                Sid = unit.Sid,
-                Position = unit.Position
+                Sid = gameObject.Sid,
+                Width = gameObject.Width,
+                Position = gameObject.Position,
+                Type = gameObject.Type,
+                ScreenPosition = gameObject.ScreenPosition,
+                Target = (gameObject.Target as GameObject)?.Sid,
+                TargetPosition = (gameObject.Target as Point)
             };
         }
     }

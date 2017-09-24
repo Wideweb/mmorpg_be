@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Game.Api.Game.Models
 {
@@ -16,7 +17,7 @@ namespace Game.Api.Game.Models
 
         public int Width => Map[0].Length;
 
-        public List<Unit> Units { get; set; }
+        public ConcurrentDictionary<string, GameObject> GameObjects { get; set; }
 
         public MapCell GetCell(int x, int y)
         {
@@ -24,5 +25,10 @@ namespace Game.Api.Game.Models
         }
 
         public Point OriginPosition { get; set; }
+
+        public Dungeon()
+        {
+            GameObjects = new ConcurrentDictionary<string, GameObject>();
+        }
     }
 }

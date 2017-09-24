@@ -1,4 +1,6 @@
-﻿using Game.Api.Game.PathfindingAlgorithm;
+﻿using Game.Api.Game.Models.Abilities;
+using Game.Api.Game.PathfindingAlgorithm;
+using Game.Api.Game.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +13,9 @@ namespace Game.Api.Game.Models
         private Point _screenPosition;
 
         public event EventHandler<EventArgs> OnCellChanged;
-        public event EventHandler<EventArgs> OnFired;
+        public event EventHandler<AbilityUsedEventArgs> OnAbilityUsed;
 
-        public string Sid { get; set; }
+        public override GameObjectType Type => GameObjectType.Unit;
 
         public override Point Position
         {
@@ -61,7 +63,9 @@ namespace Game.Api.Game.Models
         private MapCell _cell;
         
         private int _speed = 1;
-        private int _radius = 3;
+        private int _watchRange = 5;
+        private int _attackRange = 3;
+        private int _cooldown = 2000;
 
         private long _checkPause = 1500;
         private long _checkPauseElapsed = 0;
@@ -70,9 +74,7 @@ namespace Game.Api.Game.Models
         private long _updatePathPause = 500;
         private long _updatePathElapsed = 0;
 
-        private long _attackPause = 2000;
-        private long _attackElapsed = 0;
-
+        private Ability _currentAbility;
         private Target _target;
 
         public Unit(Point position, Dungeon map, string sid, bool watch)
@@ -94,20 +96,27 @@ namespace Game.Api.Game.Models
             };
 
             Sid = sid;
+            Width = GameConstants.MapCellWidth;
+            _currentAbility = new RangeAttack(this, _cooldown, _attackRange);
+            _currentAbility.OnUsed += (s, e) => OnAbilityUsed?.Invoke(this, e);
+        }
+
+        public void TakeDamage(int damage)
+        {
+
         }
 
         public override void Update(long elapsed)
         {
-            _attackElapsed += elapsed;
-            if (_attackElapsed > _attackPause)
+            if(_target != null && _currentAbility != null && _target is Unit)
             {
-                _attackElapsed = 0;
-                if (_target != null && _target is Unit)
+                _currentAbility.Update(elapsed);
+                if (_currentAbility.CanUse())
                 {
-                    OnFired?.Invoke(this, null);
+                    _currentAbility.Use();
                 }
             }
-
+            
             if (_watch)
             {
                 _checkPauseElapsed += elapsed;
@@ -178,9 +187,9 @@ namespace Game.Api.Game.Models
                 }
             }
 
-            for (var dy = -_radius; dy <= _radius; dy++)
+            for (var dy = -_watchRange; dy <= _watchRange; dy++)
             {
-                for (var dx = -_radius; dx <= _radius; dx++)
+                for (var dx = -_watchRange; dx <= _watchRange; dx++)
                 {
                     var x = _position.X + dx;
                     var y = _position.Y + dy;
@@ -268,9 +277,19 @@ namespace Game.Api.Game.Models
 
         private bool NeedMove()
         {
+            var target = _target as Unit;
+
+            if (target != null && _currentAbility.IsRanged)
+            {
+                var distance = Utils.GetDistance(_position, target.Position);
+                if(distance <= _currentAbility.Range)
+                {
+                    return false;
+                }
+            }
+
             return _path != null && _path.Count != 0;
         }
-
 
         private void UpdatePath()
         {
@@ -300,6 +319,11 @@ namespace Game.Api.Game.Models
                 path.RemoveAt(path.Count - 1);
             }
             _path = path;
+        }
+
+        private void StopMoving()
+        {
+            _path = null;
         }
     }
 }

@@ -10,12 +10,14 @@ namespace Game.Api.WebSocketManager
     {
         private static readonly Dictionary<string, Type> map = new Dictionary<string, Type>
         {
-            { WebSocketEvent.UnitState, typeof(UnitStateMessageArgs) },
+            { WebSocketEvent.GameObjectState, typeof(GameObjectStateMessageArgs) },
             { WebSocketEvent.UserConnected, typeof(UserConnectedMessageArgs) },
             { WebSocketEvent.UserData, typeof(UserDataMessageArgs) },
             { WebSocketEvent.UserDisconnected, typeof(UserDisconnectedMessageArgs) },
             { WebSocketEvent.JoinRoom, typeof(JoinRoomMessageArgs) },
-            { WebSocketEvent.SetTarget, typeof(SetTargetMessageArgs) }
+            { WebSocketEvent.SetTarget, typeof(SetTargetMessageArgs) },
+            { WebSocketEvent.UseAbility, typeof(UseAbilityMessageArgs) },
+            { WebSocketEvent.DealDamage, typeof(DealDamageMessageArgs) }
         };
 
         public static WebSocketMessageArgs GetWebSocketArgs(string eventName, string args)

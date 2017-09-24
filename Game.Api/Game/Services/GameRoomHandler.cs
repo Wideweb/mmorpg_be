@@ -25,12 +25,12 @@ namespace Game.Api.Game.Services
 
             var room = _roomManager.GetRoom(group);
             var player = room.Players.SingleOrDefault(it => it.Sid == sid);
-            var units = room.Dungeon.Units.Where(it => it.Sid != sid);
+            var gameObjects = room.Dungeon.GameObjects;
 
             var userDataMessageArgs = new UserDataMessageArgs
             {
                 Player = GameProfiles.Map(player),
-                Units = units.Select(GameProfiles.Map)
+                GameObjects = gameObjects.Select(it => GameProfiles.Map(it.Value))
             };
             await WebSocketMessageService.SendMessageAsync(sid, WebSocketEvent.UserData, userDataMessageArgs);
 
@@ -48,11 +48,6 @@ namespace Game.Api.Game.Services
 
             switch (eventName)
             {
-                case WebSocketEvent.UnitState:
-                    var unitStateArgs = (UnitStateMessageArgs)eventArgs;
-                    _roomManager.UpdatePlayer(group, sid, unitStateArgs.Position.X, unitStateArgs.Position.Y);
-                    await WebSocketMessageService.SendMessageToGroupAsync(group, eventName, eventArgs);
-                    break;
                 case WebSocketEvent.SetTarget:
                     var setTargetArgs = (SetTargetMessageArgs)eventArgs;
                     _roomManager.SetUnitTarget(group, sid, setTargetArgs.Position.X, setTargetArgs.Position.Y);
