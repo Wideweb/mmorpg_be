@@ -1,4 +1,4 @@
-﻿using Game.Api.Game.Constants;
+﻿using Game.Api.Constants;
 
 namespace Game.Api.WebSocketManager.Messages
 {

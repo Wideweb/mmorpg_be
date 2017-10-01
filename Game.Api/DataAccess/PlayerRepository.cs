@@ -1,4 +1,4 @@
-﻿using Game.Api.DataAccess.Models.Game;
+﻿using Game.Api.DataAccess.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

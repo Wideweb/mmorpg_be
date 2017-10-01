@@ -20,7 +20,7 @@ namespace Game.Api.WebSocketManager
 
         public async Task SendMessageAsync(WebSocket socket, string eventName, WebSocketMessageArgs eventArgs)
         {
-            if (socket.State != WebSocketState.Open)
+            if (socket == null || socket.State != WebSocketState.Open)
                 return;
 
             var message = new WebSocketMessage
@@ -48,8 +48,11 @@ namespace Game.Api.WebSocketManager
         public async Task SendMessageToGroupAsync(string group, string eventName, WebSocketMessageArgs eventArgs)
         {
             var sockets = WebSocketConnectionManager.GetAll(group);
-            var tasks = sockets.Select(s => SendMessageAsync(s.Value, eventName, eventArgs));
-            await Task.WhenAll(tasks);
+            if (sockets != null)
+            {
+                var tasks = sockets.Select(s => SendMessageAsync(s.Value, eventName, eventArgs));
+                await Task.WhenAll(tasks);
+            }
         }
     }
 }

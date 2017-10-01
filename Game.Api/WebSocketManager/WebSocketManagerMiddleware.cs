@@ -1,12 +1,11 @@
-﻿using Game.Api.Auth;
+﻿using Common.Api.Auth;
+using Common.Api.Exceptions;
 using Game.Api.Constants;
 using Game.Api.WebSocketManager.Messages;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +42,7 @@ namespace Game.Api.WebSocketManager
                     var eventMessage = JsonConvert.DeserializeObject<WebSocketMessage>(eventString);
 
                     var tiket = _customJwtDataFormat.Unprotect(eventMessage.Token);
-                    if(tiket == null)
+                    if (tiket == null)
                     {
                         return;
                     }
@@ -61,6 +60,7 @@ namespace Game.Api.WebSocketManager
                     {
                         await _webSocketHandler.ReceiveAsync(socket, sid, result, eventMessage.Event, args);
                     }
+
                     return;
                 }
 
@@ -84,7 +84,14 @@ namespace Game.Api.WebSocketManager
                 var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer),
                                                        cancellationToken: CancellationToken.None);
 
-                handleMessage(result, buffer);
+                try
+                {
+                    handleMessage(result, buffer);
+                }
+                catch (Exception e)
+                {
+
+                }
             }
         }
     }

@@ -1,9 +1,7 @@
-﻿using Game.Api.Auth;
+﻿using Common.Api.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
@@ -12,7 +10,6 @@ namespace Game.Api
 {
     public partial class Startup
     {
-
         private void AddAuth(IServiceCollection services)
         {
             var signingKey = GetSigningKey();
@@ -56,23 +53,6 @@ namespace Game.Api
             });
 
             services.AddSingleton(new CustomJwtDataFormat(SecurityAlgorithms.HmacSha256, tokenValidationParameters));
-        }
-
-        private void UseAuth(IApplicationBuilder app)
-        {
-            var signingKey = GetSigningKey();
-
-            var tokenProviderOptions = new TokenProviderOptions
-            {
-                Path = Configuration.GetSection("TokenAuthentication:TokenPath").Value,
-                Audience = Configuration.GetSection("TokenAuthentication:Audience").Value,
-                Issuer = Configuration.GetSection("TokenAuthentication:Issuer").Value,
-                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
-            };
-
-            app.UseAuthentication();
-
-            app.UseMiddleware<TokenProviderMiddleware>(Options.Create(tokenProviderOptions));
         }
 
 		private SymmetricSecurityKey GetSigningKey()

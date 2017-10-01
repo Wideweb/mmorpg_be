@@ -49,6 +49,11 @@ namespace Game.Api.WebSocketManager
         public async Task RemoveSocket(WebSocket socket)
         {
             var group = GetGroup(socket);
+            if(group == null)
+            {
+                return;
+            }
+
             var groupSockets = _sockets[group];
             var sid = groupSockets.SingleOrDefault(it => it.Value == socket).Key;
 

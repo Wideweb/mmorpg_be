@@ -1,4 +1,5 @@
-﻿using Game.Api.DataAccess;
+﻿using Common.Api.Middlewares;
+using Game.Api.DataAccess;
 using Game.Api.Game.Services;
 using Game.Api.Services;
 using Game.Api.WebSocketManager;
@@ -41,17 +42,13 @@ namespace Game.Api
 
             // Add framework services.
             AddAuth(services);
-
             services.AddMvc();
 
             services.AddWebSocketManager();
 
             services.AddSingleton(typeof(PlayerRepository));
-            services.AddSingleton(typeof(UserRepository));
             services.AddSingleton(typeof(DungeonRepository));
             services.AddSingleton(typeof(RoomManager));
-            services.AddTransient<IEncryptionService, EncryptionService>();
-            services.AddTransient<IMembershipService, MembershipService>();
             services.AddTransient<IDungeonService, DungeonService>();
         }
 
@@ -64,10 +61,9 @@ namespace Game.Api
             app.UseCors(builder =>
                 builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
-            UseAuth(app);
-
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+            app.UseAuthentication();
             app.UseMvc();
-
             app.UseWebSockets();
 
             app.MapWebSocketManager("/gr", serviceProvider.GetService<GameRoomHandler>());
