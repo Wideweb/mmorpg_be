@@ -2,6 +2,7 @@
 using Game.Api.Game.Models.Abilities;
 using Game.Api.Game.PathfindingAlgorithm;
 using Game.Api.Game.Services;
+using Game.Api.Models.GameEventArgs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,9 @@ namespace Game.Api.Game.Models
         private Point _position;
         private Point _screenPosition;
 
-        public event EventHandler<EventArgs> OnCellChanged;
+        public event EventHandler<CellChangedEventArgs> OnCellChanged;
         public event EventHandler<AbilityUsedEventArgs> OnAbilityUsed;
+        public event EventHandler<EventArgs> OnDied;
 
         public override GameObjectType Type => GameObjectType.Unit;
 
@@ -78,7 +80,7 @@ namespace Game.Api.Game.Models
         private Ability _currentAbility;
         private Target _target;
 
-        public Unit(Point position, Dungeon map, string sid, bool watch)
+        public Unit(Point position, Dungeon map, string sid, bool watch, long health)
         {
             _path = new List<MapCell>();
             _position = position;
@@ -97,6 +99,8 @@ namespace Game.Api.Game.Models
             };
 
             Sid = sid;
+            Health = health;
+            MaxHealth = health;
             Width = GameConstants.MapCellWidth;
             _currentAbility = new RangeAttack(this, _cooldown, _attackRange);
             _currentAbility.OnUsed += (s, e) => OnAbilityUsed?.Invoke(this, e);
@@ -104,7 +108,13 @@ namespace Game.Api.Game.Models
 
         public void TakeDamage(int damage)
         {
-
+            Health -= damage;
+            if(Health <= 0)
+            {
+                //Position = new Point { X = 1, Y = 1 };
+                Health = MaxHealth;
+                OnDied?.Invoke(this, null);
+            }
         }
 
         public override void Update(long elapsed)

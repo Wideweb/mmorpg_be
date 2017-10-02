@@ -38,6 +38,7 @@ namespace Game.Api.Game.Profiles
             return new PlayerDto
             {
                 Sid = player.Sid,
+                Name = player.Name,
                 JoinedAt = player.JoinedAt,
                 Unit = Map(player.Unit)
             };
@@ -48,6 +49,9 @@ namespace Game.Api.Game.Profiles
             return new GameObjectDto
             {
                 Sid = gameObject.Sid,
+                Name = gameObject.Name,
+                Health = gameObject.Health,
+                MaxHealth = gameObject.MaxHealth,
                 Width = gameObject.Width,
                 Position = gameObject.Position,
                 Type = gameObject.Type,

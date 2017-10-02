@@ -1,8 +1,5 @@
 ﻿using Game.Api.DataAccess;
-using Game.Api.Game;
 using Game.Api.Game.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Api.Services
 {
@@ -43,7 +40,9 @@ namespace Game.Api.Services
             foreach(var dbUnit in dbDungeon.Units)
             {
                 var sid = dbUnit.Id.ToString();
-                dungeon.GameObjects.TryAdd(sid, new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon, sid, true));
+                var unit = new Unit(new Point { X = dbUnit.X, Y = dbUnit.Y }, dungeon, sid, true, 100);
+                unit.Name = "robber";
+                dungeon.GameObjects.TryAdd(sid, unit);
             }
 
             return dungeon;

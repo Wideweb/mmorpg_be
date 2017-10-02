@@ -1,7 +1,9 @@
-﻿using Game.Api.Constants;
+﻿using Common.Api.Clients;
+using Game.Api.Constants;
 using Game.Api.Game.Models;
 using Game.Api.Game.Models.Abilities;
 using Game.Api.Game.Profiles;
+using Game.Api.Models.GameEventArgs;
 using Game.Api.Services;
 using Game.Api.Services.Exceptions;
 using Game.Api.Services.Utils;
@@ -14,6 +16,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game.Api.Game.Services
 {
@@ -23,13 +26,17 @@ namespace Game.Api.Game.Services
 
         private readonly IDungeonService _dungeonService;
         private readonly WebSocketMessageService _webSocketMessageService;
+        private readonly IdentityHttpClient _identityHttpClient;
 
         private ConcurrentDictionary<string, Room> _rooms = new ConcurrentDictionary<string, Room>();
 
-        public RoomManager(IDungeonService dungeonService, GameRoomMessageService webSocketMessageService)
+        public RoomManager(IDungeonService dungeonService, 
+            GameRoomMessageService webSocketMessageService,
+            IdentityHttpClient identityHttpClient)
         {
             _dungeonService = dungeonService;
             _webSocketMessageService = webSocketMessageService;
+            _identityHttpClient = identityHttpClient;
         }
 
         public void CreateRoom(string name, long dungeonType)
@@ -46,6 +53,7 @@ namespace Game.Api.Game.Services
                 var unit = (gameObject.Value as Unit);
                 unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, name);
                 unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, name);
+                unit.OnDied += (s, args) => OnUnitDied(s, args, name);
             }
 
             var room = new Room
@@ -82,12 +90,23 @@ namespace Game.Api.Game.Services
                 .Subscribe(x => UpdateRoom(roomName, cancelSource), cancelSource.Token);
         }
 
-        private async void OnUnitCellChanged(object s, EventArgs args, string room)
+        private async void OnUnitCellChanged(object s, CellChangedEventArgs args, string room)
         {
             var unit = s as Unit;
             await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
             {
-                GameObject = GameProfiles.Map(unit)
+                GameObject = GameProfiles.Map(unit),
+                Immediately = false
+            });
+        }
+
+        private async void OnUnitDied(object s, EventArgs args, string room)
+        {
+            var unit = s as Unit;
+            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
+            {
+                GameObject = GameProfiles.Map(unit),
+                Immediately = true
             });
         }
 
@@ -99,7 +118,7 @@ namespace Game.Api.Game.Services
             if (args.IsRanged)
             {
                 var room = GetRoom(roomName);
-                var bullet = new Bullet(bulletSid, unit.ScreenPositionCenter, unit.Target as Unit, 505);
+                var bullet = new Bullet(bulletSid, unit.ScreenPositionCenter, unit.Target as Unit, 25);
                 bullet.OnDamageDealt += (sBullet, e) => OnDamageDealt(sBullet, e, room);
                 room.Dungeon.GameObjects.TryAdd(bulletSid, bullet);
             }
@@ -118,9 +137,12 @@ namespace Game.Api.Game.Services
             var gameObject = s as GameObject;
             room.Dungeon.GameObjects.TryRemove(gameObject.Sid, out gameObject);
 
+            var targetUnit = gameObject.Target as Unit;
+
             await _webSocketMessageService.SendMessageToGroupAsync(room.Name, WebSocketEvent.DealDamage, new DealDamageMessageArgs
             {
                 TargetSid = args.Target.Sid,
+                TargetHealth = targetUnit.Health,
                 Damage = args.Damage
             });
         }
@@ -143,7 +165,7 @@ namespace Game.Api.Game.Services
             _rooms.TryRemove(name, out room);
         }
 
-        public void AddPlayer(string roomName, long userId)
+        public async Task AddPlayer(string roomName, long userId, string name)
         {
             var room = GetRoom(roomName);
             if (room == null)
@@ -153,22 +175,49 @@ namespace Game.Api.Game.Services
 
             var sid = userId.ToString();
 
-            if(room.Players.Any(it => it.Sid == sid))
+            if (room.Players.Any(it => it.Sid == sid))
             {
                 return;
             }
 
-            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false);
+            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false, 100);
+            unit.Name = name;
             unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, roomName);
             unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, roomName);
+            unit.OnDied += (s, args) => OnUnitDied(s, args, roomName);
             room.Dungeon.GameObjects.TryAdd(sid, unit);
 
             room.Players.Add(new Player
             {
                 Sid = sid,
+                Name = name,
                 JoinedAt = DateTime.UtcNow,
                 Unit = unit
             });
+        }
+
+        public async Task RemovePlayer(string roomName, long userId)
+        {
+            var room = GetRoom(roomName);
+            if (room == null)
+            {
+                throw new RoomNotFoundException(roomName);
+            }
+
+            var sid = userId.ToString();
+            var player = room.Players.FirstOrDefault(it => it.Sid == sid);
+
+            if(player == null)
+            {
+                throw new PlayerNotFoundException(sid, roomName);
+            }
+
+            room.Players.Remove(player);
+
+            if (!room.Players.Any())
+            {
+                RemoveRoom(roomName);
+            }
         }
 
         public void SetUnitTarget(string roomName, string sid, int x, int y)

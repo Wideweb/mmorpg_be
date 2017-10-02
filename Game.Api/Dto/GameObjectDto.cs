@@ -7,6 +7,12 @@ namespace Game.Api.Dto
     {
         public string Sid { get; set; }
 
+        public string Name { get; set; }
+
+        public long Health { get; set; }
+
+        public long MaxHealth { get; set; }
+
         public int Width { get; set; }
 
         public Point Position { get; set; }

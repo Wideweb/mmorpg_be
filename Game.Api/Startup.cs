@@ -1,4 +1,5 @@
-﻿using Common.Api.Middlewares;
+﻿using Common.Api.Clients;
+using Common.Api.Middlewares;
 using Game.Api.DataAccess;
 using Game.Api.Game.Services;
 using Game.Api.Services;
@@ -45,10 +46,11 @@ namespace Game.Api
             services.AddMvc();
 
             services.AddWebSocketManager();
-
+            
             services.AddSingleton(typeof(PlayerRepository));
             services.AddSingleton(typeof(DungeonRepository));
             services.AddSingleton(typeof(RoomManager));
+            services.AddSingleton(typeof(IdentityHttpClient));
             services.AddTransient<IDungeonService, DungeonService>();
         }
 

@@ -4,6 +4,7 @@ using Game.Api.Game.Profiles;
 using Common.Api.Auth;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace Game.Api.Controllers
 {
@@ -61,9 +62,16 @@ namespace Game.Api.Controllers
         }
 
         [HttpPost("Join")]
-        public ActionResult JoinRoom([FromQuery]string roomName)
+        public async Task<ActionResult> JoinRoom([FromQuery]string roomName)
         {
-            _roomManager.AddPlayer(roomName, HttpContext.UserId());
+            await _roomManager.AddPlayer(roomName, HttpContext.UserId(), HttpContext.UserName());
+            return Ok();
+        }
+
+        [HttpPost("Leave")]
+        public async Task<ActionResult> LeaveRoom([FromQuery]string roomName)
+        {
+            await _roomManager.RemovePlayer(roomName, HttpContext.UserId());
             return Ok();
         }
 
