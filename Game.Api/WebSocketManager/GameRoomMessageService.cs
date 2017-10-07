@@ -1,6 +1,6 @@
-﻿using Game.Api.WebSocketManager;
+﻿using Common.Api.WebSocketManager;
 
-namespace Game.Api.Game.Services
+namespace Game.Api.WebSocketManager
 {
     public class GameRoomMessageService : WebSocketMessageService
     {

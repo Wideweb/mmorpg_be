@@ -1,7 +1,7 @@
-﻿using Game.Api.Game.Models;
+﻿using Game.Api.Models;
 using System;
 
-namespace Game.Api.Game.Services
+namespace Game.Api.Services
 {
     public class Utils
     {

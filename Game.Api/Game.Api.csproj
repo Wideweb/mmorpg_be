@@ -23,6 +23,7 @@
     <None Include="Startup.Auth.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Clients\Clients.csproj" />
     <ProjectReference Include="..\Common.Api\Common.Api.csproj" />
   </ItemGroup>
 </Project>

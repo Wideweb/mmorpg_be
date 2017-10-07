@@ -1,8 +1,8 @@
-﻿using Game.Api.Game.Models;
+﻿using Game.Api.Models;
 using System;
 using System.Collections.Generic;
 
-namespace Game.Api.Game.PathfindingAlgorithm
+namespace Game.Api.Services.PathfindingAlgorithm
 {
     public class AStartAlgoritm
     {

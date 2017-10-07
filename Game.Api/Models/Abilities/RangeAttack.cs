@@ -1,6 +1,6 @@
 ﻿using Game.Api.Constants;
 
-namespace Game.Api.Game.Models.Abilities
+namespace Game.Api.Models.Abilities
 {
     public class RangeAttack : RangeAbility
     {

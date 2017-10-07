@@ -1,4 +1,4 @@
-﻿namespace Game.Api.WebSocketManager.Messages
+﻿namespace Common.Api.WebSocketManager.Messages
 {
     public class WebSocketMessage
     {

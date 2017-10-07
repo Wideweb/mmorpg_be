@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Game.Api.Game.Models
+namespace Game.Api.Models
 {
     public class Room
     {

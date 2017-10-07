@@ -1,10 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Game.Api.WebSocketManager
+namespace Common.Api.WebSocketManager
 {
     public abstract class WebSocketConnectionManager
     {
@@ -27,6 +28,12 @@ namespace Game.Api.WebSocketManager
             return sockets;
         }
 
+        public string GetId(WebSocket socket)
+        {
+            var sid = _sockets.SelectMany(it => it.Value).FirstOrDefault(it => it.Value == socket).Key;
+            return sid;
+        }
+
         public string GetId(WebSocket socket, string group)
         {
             var groupSockets = _sockets[group];
@@ -44,6 +51,16 @@ namespace Game.Api.WebSocketManager
         {
             var socketsGroup = _sockets.GetOrAdd(group, new ConcurrentDictionary<string, WebSocket>());
             socketsGroup.TryAdd(id, socket);
+        }
+
+        public void JoinGroup(string group, string id)
+        {
+            var socket = GetSocketById(id);
+            if(socket == null)
+            {
+                throw new ArgumentException(nameof(id));
+            }
+            AddSocket(socket, group, id);
         }
 
         public async Task RemoveSocket(WebSocket socket)
@@ -64,6 +81,18 @@ namespace Game.Api.WebSocketManager
                 await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure,
                                         statusDescription: "Closed by the WebSocketManager",
                                         cancellationToken: CancellationToken.None);
+            }
+        }
+
+        public void RemoveFromGroup(string group, string sid)
+        {
+            WebSocket socket;
+            var groupSockets = _sockets[group];
+            groupSockets.TryRemove(sid, out socket);
+            if(groupSockets.Count == 0)
+            {
+                ConcurrentDictionary<string, WebSocket> groupToDelete;
+                _sockets.TryRemove(group, out groupToDelete);
             }
         }
     }

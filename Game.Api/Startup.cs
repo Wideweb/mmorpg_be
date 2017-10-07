@@ -1,9 +1,11 @@
-﻿using Common.Api.Clients;
+﻿using Clients.IdentityClient;
 using Common.Api.Middlewares;
+using Common.Api.WebSocketManager;
+using Game.Api.Constants;
 using Game.Api.DataAccess;
-using Game.Api.Game.Services;
 using Game.Api.Services;
 using Game.Api.WebSocketManager;
+using Game.Api.WebSocketManager.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -67,6 +69,13 @@ namespace Game.Api
             app.UseAuthentication();
             app.UseMvc();
             app.UseWebSockets();
+            
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<GameObjectStateMessageArgs>(GameWebSocketEvent.GameObjectState);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<PlayerConnectedMessageArgs>(GameWebSocketEvent.PlayerConnected);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<PlayerDataMessageArgs>(GameWebSocketEvent.PlayerData);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<SetTargetMessageArgs>(GameWebSocketEvent.SetTarget);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<UseAbilityMessageArgs>(GameWebSocketEvent.UseAbility);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<DealDamageMessageArgs>(GameWebSocketEvent.DealDamage);
 
             app.MapWebSocketManager("/gr", serviceProvider.GetService<GameRoomHandler>());
         }

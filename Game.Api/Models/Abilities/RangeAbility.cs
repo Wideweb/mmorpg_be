@@ -1,6 +1,6 @@
-﻿using Game.Api.Game.Services;
+﻿using Game.Api.Services;
 
-namespace Game.Api.Game.Models.Abilities
+namespace Game.Api.Models.Abilities
 {
     public abstract class RangeAbility : Ability
     {

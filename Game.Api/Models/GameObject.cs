@@ -1,6 +1,6 @@
 ﻿using Game.Api.Constants;
 
-namespace Game.Api.Game.Models
+namespace Game.Api.Models
 {
     public abstract class GameObject : Target
     {

@@ -1,4 +1,4 @@
-﻿using Game.Api.WebSocketManager.Messages;
+﻿using Common.Api.WebSocketManager.Messages;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Game.Api.WebSocketManager
+namespace Common.Api.WebSocketManager
 {
     public abstract class WebSocketMessageService
     {
@@ -26,7 +26,7 @@ namespace Game.Api.WebSocketManager
             var message = new WebSocketMessage
             {
                 Event = eventName,
-                Data = JsonConvert.SerializeObject(eventArgs)
+                Data = eventArgs == null ? null : JsonConvert.SerializeObject(eventArgs)
             };
 
             var stringMessage = JsonConvert.SerializeObject(message);
@@ -39,13 +39,13 @@ namespace Game.Api.WebSocketManager
                                    cancellationToken: CancellationToken.None);
         }
 
-        public async Task SendMessageAsync(string sid, string eventName, WebSocketMessageArgs eventArgs)
+        public async Task SendMessageAsync(string sid, string eventName, WebSocketMessageArgs eventArgs = null)
         {
             var socket = WebSocketConnectionManager.GetSocketById(sid);
             await SendMessageAsync(socket, eventName, eventArgs);
         }
 
-        public async Task SendMessageToGroupAsync(string group, string eventName, WebSocketMessageArgs eventArgs)
+        public async Task SendMessageToGroupAsync(string group, string eventName, WebSocketMessageArgs eventArgs = null)
         {
             var sockets = WebSocketConnectionManager.GetAll(group);
             if (sockets != null)

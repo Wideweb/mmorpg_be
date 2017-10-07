@@ -1,7 +1,7 @@
 ﻿using Game.Api.Constants;
 using System;
 
-namespace Game.Api.Game.Models
+namespace Game.Api.Models
 {
     public class Bullet : GameObject
     {

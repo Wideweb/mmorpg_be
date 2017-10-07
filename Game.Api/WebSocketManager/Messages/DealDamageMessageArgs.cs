@@ -1,4 +1,6 @@
-﻿namespace Game.Api.WebSocketManager.Messages
+﻿using Common.Api.WebSocketManager.Messages;
+
+namespace Game.Api.WebSocketManager.Messages
 {
     public class DealDamageMessageArgs : WebSocketMessageArgs
     {

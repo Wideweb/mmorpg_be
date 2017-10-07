@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Game.Api.Game.Models
+namespace Game.Api.Models
 {
     public class DamageDealtEventArgs : EventArgs
     {

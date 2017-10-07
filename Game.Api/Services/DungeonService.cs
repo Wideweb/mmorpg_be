@@ -1,5 +1,5 @@
 ﻿using Game.Api.DataAccess;
-using Game.Api.Game.Models;
+using Game.Api.Models;
 
 namespace Game.Api.Services
 {

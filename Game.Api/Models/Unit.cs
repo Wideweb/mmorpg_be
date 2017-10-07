@@ -1,13 +1,13 @@
 ﻿using Game.Api.Constants;
-using Game.Api.Game.Models.Abilities;
-using Game.Api.Game.PathfindingAlgorithm;
-using Game.Api.Game.Services;
+using Game.Api.Models.Abilities;
 using Game.Api.Models.GameEventArgs;
+using Game.Api.Services;
+using Game.Api.Services.PathfindingAlgorithm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Game.Api.Game.Models
+namespace Game.Api.Models
 {
     public class Unit : GameObject
     {

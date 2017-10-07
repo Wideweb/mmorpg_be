@@ -1,4 +1,5 @@
-﻿using Game.Api.Dto;
+﻿using Common.Api.WebSocketManager.Messages;
+using Game.Api.Dto;
 
 namespace Game.Api.WebSocketManager.Messages
 {

@@ -1,13 +1,15 @@
-﻿using Game.Api.Constants;
-using Game.Api.Game.Profiles;
+﻿using Common.Api.WebSocketManager;
+using Common.Api.WebSocketManager.Messages;
+using Game.Api.Constants;
+using Game.Api.Profiles;
+using Game.Api.Services;
 using Game.Api.Services.Exceptions;
-using Game.Api.WebSocketManager;
 using Game.Api.WebSocketManager.Messages;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace Game.Api.Game.Services
+namespace Game.Api.WebSocketManager
 {
     public class GameRoomHandler : WebSocketHandler
     {
@@ -38,18 +40,18 @@ namespace Game.Api.Game.Services
 
             var gameObjects = room.Dungeon.GameObjects;
 
-            var userDataMessageArgs = new UserDataMessageArgs
+            var userDataMessageArgs = new PlayerDataMessageArgs
             {
                 Player = GameProfiles.Map(player),
                 GameObjects = gameObjects.Select(it => GameProfiles.Map(it.Value))
             };
-            await WebSocketMessageService.SendMessageAsync(sid, WebSocketEvent.UserData, userDataMessageArgs);
+            await WebSocketMessageService.SendMessageAsync(sid, GameWebSocketEvent.PlayerData, userDataMessageArgs);
 
-            var userConnectedMessageArgs = new UserConnectedMessageArgs
+            var userConnectedMessageArgs = new PlayerConnectedMessageArgs
             {
                 Player = GameProfiles.Map(player)
             };
-            await WebSocketMessageService.SendMessageToGroupAsync(group, WebSocketEvent.UserConnected, userConnectedMessageArgs);
+            await WebSocketMessageService.SendMessageToGroupAsync(group, GameWebSocketEvent.PlayerConnected, userConnectedMessageArgs);
         }
 
         public override async Task ReceiveAsync(WebSocket socket, string sid, WebSocketReceiveResult result, string eventName, WebSocketMessageArgs eventArgs)
@@ -62,38 +64,13 @@ namespace Game.Api.Game.Services
 
             switch (eventName)
             {
-                case WebSocketEvent.SetTarget:
+                case GameWebSocketEvent.SetTarget:
                     var setTargetArgs = (SetTargetMessageArgs)eventArgs;
                     _roomManager.SetUnitTarget(group, sid, setTargetArgs.Position.X, setTargetArgs.Position.Y);
                     break;
                 default:
                     break;
             }
-        }
-
-        public override async Task OnDisconnected(WebSocket socket)
-        {
-            var group = WebSocketConnectionManager.GetGroup(socket);
-
-            if(group == null)
-            {
-                return;
-            }
-
-            var sid = WebSocketConnectionManager.GetId(socket, group);
-
-            if (sid == null)
-            {
-                return;
-            }
-
-            await base.OnDisconnected(socket);
-
-            var messageArgs = new UserDisconnectedMessageArgs
-            {
-                Sid = sid
-            };
-            await WebSocketMessageService.SendMessageToGroupAsync(group, WebSocketEvent.UserDisconnected, messageArgs);
         }
     }
 }

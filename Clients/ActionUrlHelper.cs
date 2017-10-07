@@ -2,19 +2,11 @@
 using System.Text;
 using System.Web;
 
-namespace Common.Api.Clients
+namespace Clients
 {
     public static class ActionUrlHelper
     {
-        private const string IdentityApi = "http://localhost:54404/api/";
-
-        public static String User_Get(string userId)
-        {
-            var url = $"{IdentityApi}User{BuildQueryString(new { userId = userId })}";
-            return url;
-        }
-
-        private static string BuildQueryString(dynamic d)
+        public static string BuildQueryString(dynamic d)
         {
             if (d == null)
             {

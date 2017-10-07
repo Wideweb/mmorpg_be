@@ -1,13 +1,13 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Common.Api.Clients
+namespace Clients.IdentityClient
 {
     public class IdentityHttpClient
     {
         public async Task<string> GetUserName(string userId)
         {
-            var url = ActionUrlHelper.User_Get(userId);
+            var url = IdentityActionUrlHelper.User_Get(userId);
             
             using (HttpClient client = new HttpClient())
             using (HttpResponseMessage response = await client.GetAsync(url))

@@ -1,7 +1,7 @@
 ﻿using Game.Api.Constants;
 using System;
 
-namespace Game.Api.Game.Models.Abilities
+namespace Game.Api.Models.Abilities
 {
     public class AbilityUsedEventArgs : EventArgs
     {

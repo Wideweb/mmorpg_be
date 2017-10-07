@@ -1,7 +1,5 @@
 ﻿using Common.Api.Auth;
-using Common.Api.Exceptions;
-using Game.Api.Constants;
-using Game.Api.WebSocketManager.Messages;
+using Common.Api.WebSocketManager.Messages;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -10,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Game.Api.WebSocketManager
+namespace Common.Api.WebSocketManager
 {
     public class WebSocketManagerMiddleware
     {
@@ -52,9 +50,9 @@ namespace Game.Api.WebSocketManager
 
                     var args = WebSocketMessageArgsHandler.GetWebSocketArgs(eventMessage.Event, eventMessage.Data);
 
-                    if (eventMessage.Event == WebSocketEvent.JoinRoom)
+                    if (eventMessage.Event == WebSocketEvent.JoinGroup)
                     {
-                        await _webSocketHandler.OnConnected(socket, ((JoinRoomMessageArgs)args).Room, sid);
+                        await _webSocketHandler.OnConnected(socket, ((JoinGroupMessageArgs)args).Group, sid);
                     }
                     else
                     {

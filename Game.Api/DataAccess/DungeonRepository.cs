@@ -1,5 +1,5 @@
 ﻿using Game.Api.DataAccess.Models;
-using Game.Api.Services.Utils;
+using Game.Api.Services;
 using System.Collections.Generic;
 using System.Linq;
 

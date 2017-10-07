@@ -1,8 +1,8 @@
 ﻿using Game.Api.Dto;
-using Game.Api.Game.Models;
+using Game.Api.Models;
 using System.Linq;
 
-namespace Game.Api.Game.Profiles
+namespace Game.Api.Profiles
 {
     public static class GameProfiles
     {

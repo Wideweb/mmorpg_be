@@ -1,6 +1,6 @@
-﻿using Game.Api.Game.Models;
+﻿using Game.Api.Models;
 
-namespace Game.Api.Game.PathfindingAlgorithm
+namespace Game.Api.Services.PathfindingAlgorithm
 {
     public class AStartCell
     {

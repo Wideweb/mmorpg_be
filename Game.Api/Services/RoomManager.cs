@@ -1,12 +1,10 @@
-﻿using Common.Api.Clients;
+﻿using Common.Api.WebSocketManager;
 using Game.Api.Constants;
-using Game.Api.Game.Models;
-using Game.Api.Game.Models.Abilities;
-using Game.Api.Game.Profiles;
+using Game.Api.Models;
+using Game.Api.Models.Abilities;
+using Game.Api.Profiles;
 using Game.Api.Models.GameEventArgs;
-using Game.Api.Services;
 using Game.Api.Services.Exceptions;
-using Game.Api.Services.Utils;
 using Game.Api.WebSocketManager;
 using Game.Api.WebSocketManager.Messages;
 using System;
@@ -17,8 +15,10 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Clients.IdentityClient;
+using Clients.GameClient.Dto;
 
-namespace Game.Api.Game.Services
+namespace Game.Api.Services
 {
     public class RoomManager
     {
@@ -39,42 +39,83 @@ namespace Game.Api.Game.Services
             _identityHttpClient = identityHttpClient;
         }
 
-        public void CreateRoom(string name, long dungeonType)
+        public void CreateRoom(CreateGameDto startGameDto)
         {
-            if(GetRoom(name) != null)
+            var room = AddRoom(startGameDto.Name, startGameDto.DungeonType);
+
+            if(room == null)
             {
                 return;
             }
 
+            foreach(var player in startGameDto.Players)
+            {
+                AddPlayer(room, player.Sid, player.Name);
+            }
+
+            StartGame(room);
+        }
+
+        private Room AddRoom(string roomName, long dungeonType)
+        {
+            if (GetRoom(roomName) != null)
+            {
+                return null;
+            }
+
             var dungeon = _dungeonService.GetById(dungeonType);
 
-            foreach(var gameObject in dungeon.GameObjects.Where(it => it.Value.Type == GameObjectType.Unit))
+            foreach (var gameObject in dungeon.GameObjects.Where(it => it.Value.Type == GameObjectType.Unit))
             {
                 var unit = (gameObject.Value as Unit);
-                unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, name);
-                unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, name);
-                unit.OnDied += (s, args) => OnUnitDied(s, args, name);
+                unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, roomName);
+                unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, roomName);
+                unit.OnDied += (s, args) => OnUnitDied(s, args, roomName);
             }
 
             var room = new Room
             {
-                Name = name,
+                Name = roomName,
                 Dungeon = dungeon,
                 CreatedAt = DateTime.UtcNow,
                 Clock = new Stopwatch()
             };
 
-            _rooms.TryAdd(name, room);
-        }
-
-        public void StartGame(string roomName)
-        {
-            var room = GetRoom(roomName);
-            if (room == null)
+            if(_rooms.TryAdd(roomName, room))
             {
-                throw new RoomNotFoundException(roomName);
+                return room;
             }
 
+            return null;
+        }
+
+        private void AddPlayer(Room room, string sid, string name)
+        {
+            if (room.Players.Any(it => it.Sid == sid))
+            {
+                return;
+            }
+
+            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false, 100);
+            unit.Name = name;
+            unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, room.Name);
+            unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, room.Name);
+            unit.OnDied += (s, args) => OnUnitDied(s, args, room.Name);
+            room.Dungeon.GameObjects.TryAdd(sid, unit);
+
+            var player = new Player
+            {
+                Sid = sid,
+                Name = name,
+                JoinedAt = DateTime.UtcNow,
+                Unit = unit
+            };
+
+            room.Players.Add(player);
+        }
+
+        private void StartGame(Room room)
+        {
             if (room.IsStarted)
             {
                 return;
@@ -87,13 +128,13 @@ namespace Game.Api.Game.Services
 
             Observable
                 .Interval(_updateRoomDelay)
-                .Subscribe(x => UpdateRoom(roomName, cancelSource), cancelSource.Token);
+                .Subscribe(x => UpdateRoom(room.Name, cancelSource), cancelSource.Token);
         }
 
         private async void OnUnitCellChanged(object s, CellChangedEventArgs args, string room)
         {
             var unit = s as Unit;
-            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
+            await _webSocketMessageService.SendMessageToGroupAsync(room, GameWebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
             {
                 GameObject = GameProfiles.Map(unit),
                 Immediately = false
@@ -103,7 +144,7 @@ namespace Game.Api.Game.Services
         private async void OnUnitDied(object s, EventArgs args, string room)
         {
             var unit = s as Unit;
-            await _webSocketMessageService.SendMessageToGroupAsync(room, WebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
+            await _webSocketMessageService.SendMessageToGroupAsync(room, GameWebSocketEvent.GameObjectState, new GameObjectStateMessageArgs
             {
                 GameObject = GameProfiles.Map(unit),
                 Immediately = true
@@ -123,7 +164,7 @@ namespace Game.Api.Game.Services
                 room.Dungeon.GameObjects.TryAdd(bulletSid, bullet);
             }
 
-            await _webSocketMessageService.SendMessageToGroupAsync(roomName, WebSocketEvent.UseAbility, new UseAbilityMessageArgs
+            await _webSocketMessageService.SendMessageToGroupAsync(roomName, GameWebSocketEvent.UseAbility, new UseAbilityMessageArgs
             {
                 Sid = unit.Sid,
                 TargetSid = (unit.Target as Unit).Sid,
@@ -139,7 +180,7 @@ namespace Game.Api.Game.Services
 
             var targetUnit = gameObject.Target as Unit;
 
-            await _webSocketMessageService.SendMessageToGroupAsync(room.Name, WebSocketEvent.DealDamage, new DealDamageMessageArgs
+            await _webSocketMessageService.SendMessageToGroupAsync(room.Name, GameWebSocketEvent.DealDamage, new DealDamageMessageArgs
             {
                 TargetSid = args.Target.Sid,
                 TargetHealth = targetUnit.Health,
@@ -159,41 +200,10 @@ namespace Game.Api.Game.Services
             return _rooms.Select(it => it.Value).ToList();
         }
 
-        public void RemoveRoom(string name)
+        public async Task RemoveRoom(string name)
         {
             Room room;
             _rooms.TryRemove(name, out room);
-        }
-
-        public async Task AddPlayer(string roomName, long userId, string name)
-        {
-            var room = GetRoom(roomName);
-            if (room == null)
-            {
-                throw new RoomNotFoundException(roomName);
-            }
-
-            var sid = userId.ToString();
-
-            if (room.Players.Any(it => it.Sid == sid))
-            {
-                return;
-            }
-
-            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false, 100);
-            unit.Name = name;
-            unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, roomName);
-            unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, roomName);
-            unit.OnDied += (s, args) => OnUnitDied(s, args, roomName);
-            room.Dungeon.GameObjects.TryAdd(sid, unit);
-
-            room.Players.Add(new Player
-            {
-                Sid = sid,
-                Name = name,
-                JoinedAt = DateTime.UtcNow,
-                Unit = unit
-            });
         }
 
         public async Task RemovePlayer(string roomName, long userId)
@@ -216,7 +226,7 @@ namespace Game.Api.Game.Services
 
             if (!room.Players.Any())
             {
-                RemoveRoom(roomName);
+                await RemoveRoom(roomName);
             }
         }
 

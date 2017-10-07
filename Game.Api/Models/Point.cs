@@ -1,4 +1,4 @@
-﻿namespace Game.Api.Game.Models
+﻿namespace Game.Api.Models
 {
     public class Point : Target
     {
