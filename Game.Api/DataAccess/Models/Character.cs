@@ -13,5 +13,11 @@
         public int Speed { get; set; }
 
         public string Name { get; set; }
+
+        public int WatchRange { get; set; }
+
+        public int AttackRange { get; set; }
+
+        public int AttackSpeed { get; set; }
     }
 }

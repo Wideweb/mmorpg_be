@@ -24,5 +24,7 @@ namespace Game.Api.Dto
         public Point TargetPosition { get; set; }
 
         public Point ScreenPosition { get; set; }
+
+        public string SpriteFileName { get; set; }
     }
 }

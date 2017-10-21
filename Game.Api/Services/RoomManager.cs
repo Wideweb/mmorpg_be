@@ -102,8 +102,8 @@ namespace Game.Api.Services
 
             var character = _characterRepository.GetById(playerDto.CharacterId.Value);
 
-            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, playerDto.Sid, false, 
-                character.Health, character.Speed);
+            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, playerDto.Sid, false,
+                character);
             unit.Name = playerDto.Name;
             unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, room.Name);
             unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, room.Name);

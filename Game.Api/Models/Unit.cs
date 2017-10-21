@@ -1,4 +1,5 @@
 ﻿using Game.Api.Constants;
+using Game.Api.DataAccess.Models;
 using Game.Api.Models.Abilities;
 using Game.Api.Models.GameEventArgs;
 using Game.Api.Services;
@@ -64,11 +65,8 @@ namespace Game.Api.Models
         private Point _originPosition;
         private Dungeon _map;
         private MapCell _cell;
-        
-        private int _speed = 1;
-        private int _watchRange = 5;
-        private int _attackRange = 3;
-        private int _cooldown = 2000;
+
+        public Character Character { get; private set; }
 
         private long _checkPause = 1500;
         private long _checkPauseElapsed = 0;
@@ -80,7 +78,7 @@ namespace Game.Api.Models
         private Ability _currentAbility;
         private Target _target;
 
-        public Unit(Point position, Dungeon map, string sid, bool watch, long health, int speed)
+        public Unit(Point position, Dungeon map, string sid, bool watch, Character character)
         {
             _path = new List<MapCell>();
             _position = position;
@@ -89,6 +87,12 @@ namespace Game.Api.Models
             _cell = map.GetCell(_position.X, _position.Y);
             _cell.Unit = this;
             _watch = watch;
+
+            Character = character;
+            SpriteFileName = character.Name;
+            MaxHealth = character.Health;
+            Health = character.Health;
+            Speed = character.Speed;
 
             _target = null;
 
@@ -99,10 +103,8 @@ namespace Game.Api.Models
             };
 
             Sid = sid;
-            Health = health;
-            MaxHealth = health;
             Width = GameConstants.MapCellWidth;
-            _currentAbility = new RangeAttack(this, _cooldown, _attackRange);
+            _currentAbility = new RangeAttack(this, character.AttackSpeed, character.AttackRange);
             _currentAbility.OnUsed += (s, e) => OnAbilityUsed?.Invoke(this, e);
         }
 
@@ -198,9 +200,9 @@ namespace Game.Api.Models
                 }
             }
 
-            for (var dy = -_watchRange; dy <= _watchRange; dy++)
+            for (var dy = -Character.WatchRange; dy <= Character.WatchRange; dy++)
             {
-                for (var dx = -_watchRange; dx <= _watchRange; dx++)
+                for (var dx = -Character.WatchRange; dx <= Character.WatchRange; dx++)
                 {
                     var x = _position.X + dx;
                     var y = _position.Y + dy;
@@ -268,7 +270,7 @@ namespace Game.Api.Models
             int deltaY = next.Y * GameConstants.MapCellWidth - _screenPosition.Y;
 
             var distace = Math.Abs(deltaX) + Math.Abs(deltaY);
-            var speed = _speed * elapsed / 10;
+            var speed = Speed * elapsed / 10;
 
             if (distace > speed)
             {

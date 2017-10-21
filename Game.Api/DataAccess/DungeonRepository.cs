@@ -77,10 +77,10 @@ namespace Game.Api.DataAccess
             dungeonUnits.Add(new Unit
             {
                 Id = 95,
-                Health = 100,
                 UnitType = 1,
                 X = 6,
-                Y = 6
+                Y = 6,
+                Character = new Character { Id = 1, Armor = 0, Damage = 10, Health = 100, Speed = 1, Name = "archer", AttackRange = 3, WatchRange = 5, AttackSpeed = 2000 }
             });
 
             var dungeon = new Dungeon

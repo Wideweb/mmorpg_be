@@ -25,5 +25,7 @@ namespace Game.Api.Models
         public virtual Point ScreenPosition { get; set; }
 
         public virtual void Update(long elapsed) { }
+
+        public string SpriteFileName { get; set; }
     }
 }

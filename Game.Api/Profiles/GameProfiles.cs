@@ -59,7 +59,8 @@ namespace Game.Api.Profiles
                 Type = gameObject.Type,
                 ScreenPosition = gameObject.ScreenPosition,
                 Target = (gameObject.Target as GameObject)?.Sid,
-                TargetPosition = (gameObject.Target as Point)
+                TargetPosition = (gameObject.Target as Point),
+                SpriteFileName = gameObject.SpriteFileName
             };
         }
     }
