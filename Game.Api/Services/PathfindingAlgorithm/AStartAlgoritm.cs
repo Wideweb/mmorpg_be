@@ -6,8 +6,8 @@ namespace Game.Api.Services.PathfindingAlgorithm
 {
     public class AStartAlgoritm
     {
-        private int[] _dy => new int[8] { 0, 0, 1, -1, 1, -1, 1, -1 };
-        private int[] _dx => new int[8] { 1, -1, 0, 0, 1, 1, -1, -1 };
+        private int[] _dy => new int[4] { 0, 0, 1, -1 };
+        private int[] _dx => new int[4] { 1, -1, 0, 0 };
 
         private readonly Dungeon _map;
         private readonly Point _start;

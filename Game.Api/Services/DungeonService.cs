@@ -24,7 +24,7 @@ namespace Game.Api.Services
                 for (var x = 0; x < dbDungeon.Width; x++)
                 {
                     var dbCell = dbDungeon.Map[y * dbDungeon.Width + x];
-                    map[y][x] = new MapCell(x, y, dbCell.Type);
+                    map[y][x] = new MapCell(x, y, dbCell.Type, dbCell.IsWalkable, dbCell.IsTransparent);
                 }
             }
 

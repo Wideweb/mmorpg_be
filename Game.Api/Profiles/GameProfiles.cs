@@ -29,7 +29,9 @@ namespace Game.Api.Profiles
             return new MapCellDto {
                 X = cell.X,
                 Y = cell.Y,
-                Type = cell.Type
+                Type = cell.Type,
+                IsWalkable = cell.IsWalkable,
+                IsTransparent = cell.IsTransparent
             };
         }
 

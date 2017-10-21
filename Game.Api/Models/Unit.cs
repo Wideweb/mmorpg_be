@@ -173,7 +173,7 @@ namespace Game.Api.Models
                     {
                         var cell = this._map.GetCell(x, y);
 
-                        if (cell.Type == 1)
+                        if (!cell.IsTransparent)
                         {
                             walls.Add(cell);
                         }
@@ -217,7 +217,7 @@ namespace Game.Api.Models
 
                     var cell = _map.GetCell(x, y);
 
-                    if (cell.Type == 1)
+                    if (!cell.IsTransparent)
                     {
                         walls.Add(cell);
                     }
@@ -321,7 +321,7 @@ namespace Game.Api.Models
                 targetPosition = _target as Point; 
             }
 
-            var pathFinder = new AStartAlgoritm(_map, _position, targetPosition, p => _map.GetCell(p.X, p.Y).Type == 1);
+            var pathFinder = new AStartAlgoritm(_map, _position, targetPosition, p => !_map.GetCell(p.X, p.Y).IsWalkable);
 
             var path = pathFinder.GetPath();
 

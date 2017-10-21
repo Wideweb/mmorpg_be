@@ -11,15 +11,21 @@ namespace Game.Api.Models
 
         public int Type { get; }
 
+        public bool IsWalkable { get; set; }
+
+        public bool IsTransparent { get; set; }
+
         public Unit Unit { get; set; }
 
         public List<Point> Polygon { get; }
         
-        public MapCell(int x, int y, int type, Unit unit = null)
+        public MapCell(int x, int y, int type, bool isWalkable, bool isTransparent, Unit unit = null)
         {
             X = x;
             Y = y;
             Type = type;
+            IsWalkable = isWalkable;
+            IsTransparent = isTransparent;
             Unit = unit;
 
             var screenX = X * GameConstants.MapCellWidth;

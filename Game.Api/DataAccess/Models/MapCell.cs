@@ -7,5 +7,9 @@
         public int Y { get; set; }
 
         public int Type { get; set; }
+
+        public bool IsWalkable { get; set; }
+
+        public bool IsTransparent { get; set; }
     }
 }
