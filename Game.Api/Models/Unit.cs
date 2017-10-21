@@ -80,7 +80,7 @@ namespace Game.Api.Models
         private Ability _currentAbility;
         private Target _target;
 
-        public Unit(Point position, Dungeon map, string sid, bool watch, long health)
+        public Unit(Point position, Dungeon map, string sid, bool watch, long health, int speed)
         {
             _path = new List<MapCell>();
             _position = position;

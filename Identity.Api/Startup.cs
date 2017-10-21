@@ -47,8 +47,9 @@ namespace Identity.Api
             services.AddMvc();
 
             services.AddWebSocketManager();
-
+            
             services.AddSingleton(typeof(UserRepository));
+            services.AddSingleton(typeof(CharacterRepository));
             services.AddTransient<IEncryptionService, EncryptionService>();
             services.AddTransient<IMembershipService, MembershipService>();
             services.AddSingleton(typeof(GameHttpClient));
@@ -73,6 +74,7 @@ namespace Identity.Api
             WebSocketMessageArgsHandler.AddOrReplaceEvent<RoomRemovedMessageArgs>(IdentityWebSocketEvent.RoomRemoved);
             WebSocketMessageArgsHandler.AddOrReplaceEvent<PlayerJoinedMessageArgs>(IdentityWebSocketEvent.PlayerJoined);
             WebSocketMessageArgsHandler.AddOrReplaceEvent<PlayerLeftMessageArgs>(IdentityWebSocketEvent.PlayerLeft);
+            WebSocketMessageArgsHandler.AddOrReplaceEvent<CharacterChosenMessageArgs>(IdentityWebSocketEvent.CharacterChosen);
 
             app.MapWebSocketManager("/id", serviceProvider.GetService<IdentityHandler>());
         }

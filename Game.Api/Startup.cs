@@ -50,6 +50,7 @@ namespace Game.Api
             services.AddWebSocketManager();
             
             services.AddSingleton(typeof(PlayerRepository));
+            services.AddSingleton(typeof(CharacterRepository));
             services.AddSingleton(typeof(DungeonRepository));
             services.AddSingleton(typeof(RoomManager));
             services.AddSingleton(typeof(IdentityHttpClient));

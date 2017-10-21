@@ -1,6 +1,6 @@
 ﻿using Common.Api.Exceptions;
 
-namespace Idntity.Api.Services.Exceptions
+namespace Identity.Api.Services.Exceptions
 {
     public class PlayerNotFoundException : NotFoundException
     {

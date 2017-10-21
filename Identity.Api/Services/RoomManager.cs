@@ -10,6 +10,7 @@ using Clients.GameClient.Dto;
 using Identity.Api.Services.Exceptions;
 using Identity.Api.WebSocketManager.Messages;
 using Clients.GameClient;
+using Identity.Api.DataAccess;
 
 namespace Identity.Api.Services
 {
@@ -19,18 +20,21 @@ namespace Identity.Api.Services
         private readonly GameHttpClient _gameHttpClient;
         private readonly IMembershipService _membershipService;
         private readonly IdentityConnectionManager _webSocketConnectionManager;
+        private readonly CharacterRepository _characterRepository;
 
         private ConcurrentDictionary<string, CreateGameDto> _rooms = new ConcurrentDictionary<string, CreateGameDto>();
 
         public RoomManager(IdentityMessageService webSocketMessageService, 
             GameHttpClient gameHttpClient, 
             IMembershipService membershipService,
-            IdentityConnectionManager webSocketConnectionManager)
+            IdentityConnectionManager webSocketConnectionManager,
+            CharacterRepository characterRepository)
         {
             _webSocketMessageService = webSocketMessageService;
             _gameHttpClient = gameHttpClient;
             _membershipService = membershipService;
             _webSocketConnectionManager = webSocketConnectionManager;
+            _characterRepository = characterRepository;
         }
 
         public async Task CreateRoom(string name, long dungeonType)
@@ -60,6 +64,11 @@ namespace Identity.Api.Services
             if (room == null)
             {
                 throw new RoomNotFoundException(roomName);
+            }
+            
+            if (room.Players.Any(p => p.CharacterId == null))
+            {
+                throw new StartGameException("Not all players have chosen the characters");
             }
 
             if (room.IsStarted)
@@ -166,6 +175,37 @@ namespace Identity.Api.Services
                     Sid = sid
                 });
             }
+        }
+
+        public async Task ChoseCharacter(string roomName, string sid, long characterId)
+        {
+            var room = GetRoom(roomName);
+            if (room == null)
+            {
+                throw new RoomNotFoundException(roomName);
+            }
+
+            var player = room.Players.FirstOrDefault(it => it.Sid == sid);
+            if (player == null)
+            {
+                throw new PlayerNotFoundException(sid, roomName);
+            }
+
+            var character = _characterRepository.GetById(characterId);
+            if (character == null)
+            {
+                throw new CharacterNotFoundException(characterId);
+            }
+
+            player.CharacterId = characterId;
+
+            _webSocketConnectionManager.JoinGroup(roomName, sid);
+            await _webSocketMessageService.SendMessageToGroupAsync(roomName, IdentityWebSocketEvent.CharacterChosen, new CharacterChosenMessageArgs
+            {
+                PlayerSid = sid,
+                CharacterId = characterId,
+                CharacterName = character.Name
+            });
         }
     }
 }

@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clients.IdentityClient;
 using Clients.GameClient.Dto;
+using Game.Api.DataAccess;
 
 namespace Game.Api.Services
 {
@@ -25,6 +26,7 @@ namespace Game.Api.Services
         private readonly TimeSpan _updateRoomDelay = TimeSpan.FromMilliseconds(30);
 
         private readonly IDungeonService _dungeonService;
+        private readonly CharacterRepository _characterRepository;
         private readonly WebSocketMessageService _webSocketMessageService;
         private readonly IdentityHttpClient _identityHttpClient;
 
@@ -32,11 +34,13 @@ namespace Game.Api.Services
 
         public RoomManager(IDungeonService dungeonService, 
             GameRoomMessageService webSocketMessageService,
-            IdentityHttpClient identityHttpClient)
+            IdentityHttpClient identityHttpClient,
+            CharacterRepository characterRepository)
         {
             _dungeonService = dungeonService;
             _webSocketMessageService = webSocketMessageService;
             _identityHttpClient = identityHttpClient;
+            _characterRepository = characterRepository;
         }
 
         public void CreateRoom(CreateGameDto startGameDto)
@@ -50,7 +54,7 @@ namespace Game.Api.Services
 
             foreach(var player in startGameDto.Players)
             {
-                AddPlayer(room, player.Sid, player.Name);
+                AddPlayer(room, player);
             }
 
             StartGame(room);
@@ -89,24 +93,27 @@ namespace Game.Api.Services
             return null;
         }
 
-        private void AddPlayer(Room room, string sid, string name)
+        private void AddPlayer(Room room, CreatePlayerDto playerDto)
         {
-            if (room.Players.Any(it => it.Sid == sid))
+            if (room.Players.Any(it => it.Sid == playerDto.Sid))
             {
                 return;
             }
 
-            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, sid, false, 100);
-            unit.Name = name;
+            var character = _characterRepository.GetById(playerDto.CharacterId.Value);
+
+            var unit = new Unit(room.Dungeon.OriginPosition.Clone(), room.Dungeon, playerDto.Sid, false, 
+                character.Health, character.Speed);
+            unit.Name = playerDto.Name;
             unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, room.Name);
             unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, room.Name);
             unit.OnDied += (s, args) => OnUnitDied(s, args, room.Name);
-            room.Dungeon.GameObjects.TryAdd(sid, unit);
+            room.Dungeon.GameObjects.TryAdd(playerDto.Sid, unit);
 
             var player = new Player
             {
-                Sid = sid,
-                Name = name,
+                Sid = playerDto.Sid,
+                Name = playerDto.Name,
                 JoinedAt = DateTime.UtcNow,
                 Unit = unit
             };

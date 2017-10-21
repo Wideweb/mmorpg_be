@@ -7,5 +7,6 @@
         public const string PlayerJoined = "PLAYER_JOINED";
         public const string PlayerLeft = "PLAYER_LEFT";
         public const string GameStarted = "GAME_STARTED";
+        public const string CharacterChosen = "CHARACTER_CHOSEN";
     }
 }

@@ -1,8 +1,8 @@
-﻿namespace Game.Api.DataAccess.Models
+﻿namespace Identity.Api.DataAccess.Models
 {
-    public class Character
+    public class Character : EntityBase
     {
-        public long Id { get; set; }
+        public string Name { get; set; }
 
         public long Health { get; set; }
 
@@ -11,7 +11,5 @@
         public long Damage { get; set; }
 
         public int Speed { get; set; }
-
-        public string Name { get; set; }
     }
 }
