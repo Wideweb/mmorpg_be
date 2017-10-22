@@ -80,7 +80,7 @@ namespace Game.Api.DataAccess
                 UnitType = 1,
                 X = 6,
                 Y = 6,
-                Character = new Character { Id = 1, Armor = 0, Damage = 10, Health = 100, Speed = 1, Name = "archer", AttackRange = 3, WatchRange = 5, AttackSpeed = 2000 }
+                Character = new Character { Id = 1, Armor = 0, Damage = 10, Health = 100, Speed = 1, Name = "archer", AttackRange = 3, WatchRange = 5, AttackSpeed = 2000, AbilityCastSpeed = 500 }
             });
 
             var dungeon = new Dungeon

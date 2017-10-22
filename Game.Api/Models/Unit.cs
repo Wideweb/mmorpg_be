@@ -17,6 +17,7 @@ namespace Game.Api.Models
 
         public event EventHandler<CellChangedEventArgs> OnCellChanged;
         public event EventHandler<AbilityUsedEventArgs> OnAbilityUsed;
+        public event EventHandler<AbilityCastEventArgs> OnAbilityCast;
         public event EventHandler<EventArgs> OnDied;
 
         public override GameObjectType Type => GameObjectType.Unit;
@@ -104,8 +105,9 @@ namespace Game.Api.Models
 
             Sid = sid;
             Width = GameConstants.MapCellWidth;
-            _currentAbility = new RangeAttack(this, character.AttackSpeed, character.AttackRange);
+            _currentAbility = new RangeAttack(this, character.AttackSpeed, character.AttackRange, character.AbilityCastSpeed);
             _currentAbility.OnUsed += (s, e) => OnAbilityUsed?.Invoke(this, e);
+            _currentAbility.OnCast += (s, e) => OnAbilityCast?.Invoke(this, e);
         }
 
         public void TakeDamage(int damage)
@@ -121,12 +123,17 @@ namespace Game.Api.Models
 
         public override void Update(long elapsed)
         {
-            if(_target != null && _currentAbility != null && _target is Unit)
+            if (NeedMove())
+            {
+                _currentAbility.CancelCast();
+                Run(elapsed);
+            }
+            else if (_target != null && _currentAbility != null && _target is Unit)
             {
                 _currentAbility.Update(elapsed);
                 if (_currentAbility.CanUse())
                 {
-                    _currentAbility.Use();
+                    _currentAbility.Cast();
                 }
             }
             
@@ -149,11 +156,6 @@ namespace Game.Api.Models
                 if (_target is Unit) {
                     UpdatePath();
                 }
-            }
-
-            if (NeedMove())
-            {
-                Run(elapsed);
             }
         }
 

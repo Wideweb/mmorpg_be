@@ -8,8 +8,8 @@ namespace Game.Api.DataAccess
     {
         private static List<Character> characters = new List<Character>
         {
-            new Character{ Id = 1, Armor = 0, Damage = 10, Health = 100, Speed = 1, Name = "archer", AttackRange = 3, WatchRange = 5, AttackSpeed = 2000 },
-            new Character{ Id = 2, Armor = 10, Damage = 5, Health = 150, Speed = 1, Name = "warrior", AttackRange = 1, WatchRange = 5, AttackSpeed = 2000 }
+            new Character{ Id = 1, Armor = 0, Damage = 10, Health = 100, Speed = 1, Name = "archer", AttackRange = 3, WatchRange = 5, AttackSpeed = 2000, AbilityCastSpeed = 500 },
+            new Character{ Id = 2, Armor = 10, Damage = 5, Health = 150, Speed = 1, Name = "warrior", AttackRange = 1, WatchRange = 5, AttackSpeed = 2000, AbilityCastSpeed = 500 }
         };
 
         public Character GetById(long id)

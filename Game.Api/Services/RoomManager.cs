@@ -74,6 +74,7 @@ namespace Game.Api.Services
                 var unit = (gameObject.Value as Unit);
                 unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, roomName);
                 unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, roomName);
+                unit.OnAbilityCast += (s, args) => OnUnitAbilityCast(s, args, roomName);
                 unit.OnDied += (s, args) => OnUnitDied(s, args, roomName);
             }
 
@@ -107,6 +108,7 @@ namespace Game.Api.Services
             unit.Name = playerDto.Name;
             unit.OnCellChanged += (s, args) => OnUnitCellChanged(s, args, room.Name);
             unit.OnAbilityUsed += (s, args) => OnUnitAbilityUsed(s, args, room.Name);
+            unit.OnAbilityCast += (s, args) => OnUnitAbilityCast(s, args, room.Name);
             unit.OnDied += (s, args) => OnUnitDied(s, args, room.Name);
             room.Dungeon.GameObjects.TryAdd(playerDto.Sid, unit);
 
@@ -177,6 +179,19 @@ namespace Game.Api.Services
                 TargetSid = (unit.Target as Unit).Sid,
                 BulletSid = bulletSid,
                 AbilityType = args.AbilityType
+            });
+        }
+
+        private async void OnUnitAbilityCast(object s, AbilityCastEventArgs args, string roomName)
+        {
+            var unit = s as Unit;
+            var bulletSid = Guid.NewGuid().ToString();
+
+            await _webSocketMessageService.SendMessageToGroupAsync(roomName, GameWebSocketEvent.CastAbility, new CastAbilityMessageArgs
+            {
+                Sid = unit.Sid,
+                AbilityType = args.AbilityType,
+                CastTime = args.CastTime
             });
         }
 

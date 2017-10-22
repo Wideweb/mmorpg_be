@@ -6,6 +6,7 @@
         public const string PlayerData = "PLAYER_DATA";
         public const string GameObjectState = "GAME_OBJECT_STATE";
         public const string SetTarget = "SET_TARGET";
+        public const string CastAbility = "CAST_ABILITY";
         public const string UseAbility = "USE_ABILITY";
         public const string DealDamage = "DEAL_DAMAGE";
 

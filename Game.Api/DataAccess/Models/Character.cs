@@ -19,5 +19,7 @@
         public int AttackRange { get; set; }
 
         public int AttackSpeed { get; set; }
+
+        public int AbilityCastSpeed { get; set; }
     }
 }

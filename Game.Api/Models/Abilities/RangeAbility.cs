@@ -4,8 +4,8 @@ namespace Game.Api.Models.Abilities
 {
     public abstract class RangeAbility : Ability
     {
-        public RangeAbility(Unit unit, long cooldown, int range)
-            : base(unit, cooldown)
+        public RangeAbility(Unit unit, long cooldown, int range, long castTime)
+            : base(unit, cooldown, castTime)
         {
             _isRanged = true;
             _range = range;
